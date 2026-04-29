@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ejercicios Interactivos – Transformada de Laplace | UNAD 100412</title>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+<style>
+  :root {
+    --unad-blue: #003DA5;
+    --unad-orange: #FF6B35;
+    --unad-light: #E8F0FE;
+    --green: #1B7F4F;
+    --green-light: #E6F4EE;
+    --hint-bg: #FFF3E0;
+    --hint-border: #FF9800;
+    --solved-bg: #E8F5E9;
+    --solved-border: #4CAF50;
+    --text: #1a1a2e;
+    --card-shadow: 0 4px 20px rgba(0,61,165,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f4ff;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--unad-blue) 0%, #0055cc 100%);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.5px; }
+  header p  { font-size: 0.9rem; opacity: 0.85; margin-top: 0.3rem; }
+  .badge {
+    display: inline-block;
+    background: var(--unad-orange);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar-wrap {
+    background: white;
+    border-bottom: 1px solid #dde4f5;
+    padding: 0.7rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .progress-label { font-size: 0.85rem; color: var(--unad-blue); font-weight: 600; white-space: nowrap; }
+  .bar-outer {
+    flex: 1; min-width: 120px;
+    background: #dde4f5; border-radius: 20px; height: 10px; overflow: hidden;
+  }
+  .bar-inner {
+    height: 100%; background: var(--unad-orange);
+    border-radius: 20px; transition: width 0.5s ease;
+    width: 0%;
+  }
+  .checkboxes { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .checkboxes label {
+    font-size: 0.75rem; cursor: pointer;
+    background: var(--unad-light); border: 1.5px solid var(--unad-blue);
+    border-radius: 6px; padding: 2px 8px; transition: all .2s;
+    user-select: none;
+  }
+  .checkboxes input { display: none; }
+  .checkboxes input:checked + span { text-decoration: line-through; opacity: 0.6; }
+  .checkboxes label.done { background: var(--green); border-color: var(--green); color: white; }
+
+  /* ── LAYOUT ── */
+  main { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+
+  /* ── REFERENCE PANEL ── */
+  .ref-panel {
+    background: white;
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    border: 1.5px solid var(--unad-light);
+  }
+  .ref-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--unad-blue);
+    color: white; cursor: pointer;
+    font-weight: 700; font-size: 1rem;
+    user-select: none;
+  }
+  .ref-toggle .arrow { font-size: 1.1rem; transition: transform .3s; }
+  .ref-toggle.open .arrow { transform: rotate(180deg); }
+  .ref-body {
+    display: none; padding: 1.2rem 1.5rem 1.4rem;
+  }
+  .ref-body.visible { display: block; }
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+  .ref-card {
+    background: var(--unad-light);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    border-left: 4px solid var(--unad-blue);
+  }
+  .ref-card h4 { font-size: 0.8rem; text-transform: uppercase; color: var(--unad-blue); margin-bottom: 0.5rem; letter-spacing: 0.5px; }
+  .formula-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.3rem 0; font-size: 0.92rem; }
+  .formula-row .arrow-r { color: var(--unad-orange); font-weight: bold; }
+
+  /* ── EXERCISE CARDS ── */
+  .exercise-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    border: 1.5px solid #dde4f5;
+    transition: box-shadow .2s;
+  }
+  .exercise-card:hover { box-shadow: 0 8px 28px rgba(0,61,165,0.18); }
+
+  .card-header {
+    background: linear-gradient(90deg, var(--unad-orange), #ff8c5a);
+    padding: 1rem 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .card-header h2 { color: white; font-size: 1.05rem; font-weight: 700; }
+  .card-header .tag {
+    background: rgba(255,255,255,0.25);
+    color: white; border-radius: 20px;
+    padding: 2px 12px; font-size: 0.75rem; font-weight: 600;
+  }
+
+  .card-body { padding: 1.2rem 1.5rem; }
+
+  .problem-box {
+    background: #FFF8F5;
+    border: 2px solid var(--unad-orange);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    text-align: center;
+  }
+  .problem-box .ic { font-size: 0.85rem; color: #666; margin-top: 0.4rem; }
+
+  .btn-row { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+  .btn {
+    padding: 0.5rem 1.1rem;
+    border: none; border-radius: 8px;
+    font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-hint {
+    background: var(--hint-bg);
+    border: 1.5px solid var(--hint-border);
+    color: #7a4800;
+  }
+  .btn-hint:hover { background: #FFE0B2; }
+  .btn-solve {
+    background: var(--unad-blue);
+    color: white;
+  }
+  .btn-solve:hover { background: #0050c8; }
+  .btn-mark {
+    background: var(--green-light);
+    border: 1.5px solid var(--green);
+    color: var(--green);
+    margin-left: auto;
+  }
+  .btn-mark:hover { background: #c8f0da; }
+
+  /* ── HINTS ── */
+  .hint-box {
+    background: var(--hint-bg);
+    border-left: 4px solid var(--hint-border);
+    border-radius: 0 10px 10px 0;
+    padding: 0.9rem 1.2rem;
+    margin-bottom: 0.8rem;
+    display: none;
+  }
+  .hint-box.visible { display: block; animation: fadeIn .3s ease; }
+  .hint-box p { margin-bottom: 0.4rem; font-size: 0.9rem; }
+  .hint-box strong { color: #7a4800; }
+
+  /* ── SOLUTION ── */
+  .solution-box {
+    background: var(--solved-bg);
+    border: 1.5px solid var(--solved-border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    display: none;
+  }
+  .solution-box.visible { display: block; animation: fadeIn .4s ease; }
+  .solution-box h3 {
+    color: var(--green);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.8rem;
+    border-bottom: 1.5px solid #a8d5bb;
+    padding-bottom: 0.4rem;
+  }
+  .step {
+    margin-bottom: 0.9rem;
+    padding: 0.8rem 1rem;
+    background: white;
+    border-radius: 8px;
+    border-left: 3px solid var(--unad-blue);
+  }
+  .step-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--unad-blue);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+  }
+  .step-content { font-size: 0.93rem; }
+  .verify-step {
+    border-left-color: var(--green);
+    background: #f2faf6;
+  }
+  .verify-step .step-title { color: var(--green); }
+  .final-answer {
+    background: var(--unad-blue);
+    color: white;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    text-align: center;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #555;
+    font-size: 0.82rem;
+    border-top: 1px solid #dde4f5;
+    margin-top: 1rem;
+  }
+  footer strong { color: var(--unad-blue); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.2rem; }
+    .card-body { padding: 1rem; }
+    .btn { font-size: 0.82rem; padding: 0.45rem 0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <h1>Ejercicios Interactivos: Transformada de Laplace</h1>
+  <p>Solución de EDOs de 2.° orden con valores iniciales</p>
+  <div class="badge">Ecuaciones Diferenciales · Código 100412 · UNAD</div>
+</header>
+
+<!-- ══ PROGRESS ══ -->
+<div class="progress-bar-wrap">
+  <span class="progress-label">Progreso: <span id="cnt">0</span>/6</span>
+  <div class="bar-outer"><div class="bar-inner" id="bar"></div></div>
+  <div class="checkboxes" id="checkboxes"></div>
+</div>
+
+<main>
+
+<!-- ══ REFERENCE PANEL ══ -->
+<div class="ref-panel">
+  <div class="ref-toggle" id="refToggle" onclick="toggleRef()">
+    📐 Formulario de Referencia Rápida
+    <span class="arrow">▼</span>
+  </div>
+  <div class="ref-body" id="refBody">
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>Transformadas de Derivadas</h4>
+        <div class="formula-row">\(\mathcal{L}\{y'\} \) <span class="arrow-r">→</span> \(sY(s) - y(0)\)</div>
+        <div class="formula-row">\(\mathcal{L}\{y''\}\) <span class="arrow-r">→</span> \(s^2Y(s) - sy(0) - y'(0)\)</div>
+      </div>
+      <div class="ref-card">
+        <h4>Transformadas Inversas Básicas</h4>
+        <div class="formula-row">\(\dfrac{1}{s-a}\) <span class="arrow-r">→</span> \(e^{at}\)</div>
+        <div class="formula-row">\(\dfrac{b}{(s-a)^2+b^2}\) <span class="arrow-r">→</span> \(e^{at}\sin(bt)\)</div>
+        <div class="formula-row">\(\dfrac{s-a}{(s-a)^2+b^2}\) <span class="arrow-r">→</span> \(e^{at}\cos(bt)\)</div>
+      </div>
+      <div class="ref-card">
+        <h4>Fracciones Parciales — Raíces Reales</h4>
+        <div class="formula-row" style="display:block;">\[\frac{As+B}{(s-r_1)(s-r_2)} = \frac{C_1}{s-r_1}+\frac{C_2}{s-r_2}\]</div>
+        <p style="font-size:0.82rem;color:#555;">Sustituir \(s=r_1\) y \(s=r_2\) para hallar \(C_1, C_2\).</p>
+      </div>
+      <div class="ref-card">
+        <h4>Raíces Complejas — Completar Cuadrado</h4>
+        <div class="formula-row" style="display:block;">\[s^2+2as+a^2+b^2 = (s+a)^2+b^2\]</div>
+        <p style="font-size:0.82rem;color:#555;">Reescribir el numerador en función de \((s+a)\).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EJERCICIO 1 — Raíces reales negativas distintas
+═══════════════════════════════════════════════ -->
+<div class="exercise-card" id="card1">
+  <div class="card-header">
+    <h2>Ejercicio 1</h2>
+    <span class="tag">Raíces reales negativas</span>
+  </div>
+  <div class="card-body">
+    <div class="problem-box">
+      \(y'' + 5y' + 6y = 0\)
+      <div class="ic">Condiciones iniciales: \(y(0)=1,\quad y'(0)=3\)</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-hint" onclick="toggleHint(1)">💡 Pistas</button>
+      <button class="btn btn-solve" onclick="toggleSolution(1)">📖 Ver solución completa</button>
+      <button class="btn btn-mark" onclick="markDone(1)">✔ Marcar completado</button>
+    </div>
+    <div class="hint-box" id="hint1">
+      <p><strong>Pista 1:</strong> Aplica \(\mathcal{L}\{\cdot\}\) a toda la ecuación y usa las fórmulas de derivadas.</p>
+      <p><strong>Pista 2:</strong> Factoriza \(s^2+5s+6 = (s+2)(s+3)\).</p>
+      <p><strong>Pista 3:</strong> Descompón en fracciones parciales: busca \(A\) con \(s=-2\) y \(B\) con \(s=-3\).</p>
+    </div>
+    <div class="solution-box" id="sol1">
+      <h3>✅ Solución Paso a Paso</h3>
+      <div class="step">
+        <div class="step-title">Planteamiento</div>
+        <div class="step-content">
+          EDO: \(y'' + 5y' + 6y = 0\) con \(y(0)=1,\ y'(0)=3\).
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 1 — Aplicar \(\mathcal{L}\{\cdot\}\)</div>
+        <div class="step-content">
+          \[\mathcal{L}\{y''\} + 5\,\mathcal{L}\{y'\} + 6\,\mathcal{L}\{y\} = 0\]
+          \[\bigl(s^2Y - s\cdot1 - 3\bigr) + 5\bigl(sY - 1\bigr) + 6Y = 0\]
+          \[s^2Y - s - 3 + 5sY - 5 + 6Y = 0\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 2 — Despejar \(Y(s)\)</div>
+        <div class="step-content">
+          \[Y(s)\bigl(s^2+5s+6\bigr) = s + 8\]
+          \[Y(s) = \frac{s+8}{s^2+5s+6} = \frac{s+8}{(s+2)(s+3)}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 3 — Fracciones Parciales</div>
+        <div class="step-content">
+          \[\frac{s+8}{(s+2)(s+3)} = \frac{A}{s+2}+\frac{B}{s+3}\]
+          \[s=-2:\quad \frac{-2+8}{-2+3}=\frac{6}{1}=6 \Rightarrow A=6\]
+          \[s=-3:\quad \frac{-3+8}{-3+2}=\frac{5}{-1}=-5 \Rightarrow B=-5\]
+          \[Y(s) = \frac{6}{s+2} - \frac{5}{s+3}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 4 — Transformada Inversa</div>
+        <div class="step-content">
+          \[y(t) = \mathcal{L}^{-1}\!\left\{\frac{6}{s+2}\right\} - \mathcal{L}^{-1}\!\left\{\frac{5}{s+3}\right\}\]
+        </div>
+      </div>
+      <div class="final-answer">
+        \[\boxed{y(t) = 6e^{-2t} - 5e^{-3t}}\]
+      </div>
+      <div class="step verify-step">
+        <div class="step-title">Paso 5 — Verificación</div>
+        <div class="step-content">
+          \(y(0)=6-5=1\;✓\)<br>
+          \(y'(t)=-12e^{-2t}+15e^{-3t}\Rightarrow y'(0)=-12+15=3\;✓\)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EJERCICIO 2 — Raíces reales positivas
+═══════════════════════════════════════════════ -->
+<div class="exercise-card" id="card2">
+  <div class="card-header">
+    <h2>Ejercicio 2</h2>
+    <span class="tag">Raíces reales positivas</span>
+  </div>
+  <div class="card-body">
+    <div class="problem-box">
+      \(y'' - 5y' + 6y = 0\)
+      <div class="ic">Condiciones iniciales: \(y(0)=2,\quad y'(0)=7\)</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-hint" onclick="toggleHint(2)">💡 Pistas</button>
+      <button class="btn btn-solve" onclick="toggleSolution(2)">📖 Ver solución completa</button>
+      <button class="btn btn-mark" onclick="markDone(2)">✔ Marcar completado</button>
+    </div>
+    <div class="hint-box" id="hint2">
+      <p><strong>Pista 1:</strong> Aplica la transformada con \(y(0)=2,\ y'(0)=7\).</p>
+      <p><strong>Pista 2:</strong> Factoriza \(s^2-5s+6=(s-2)(s-3)\).</p>
+      <p><strong>Pista 3:</strong> Las raíces son positivas, la solución crece exponencialmente.</p>
+    </div>
+    <div class="solution-box" id="sol2">
+      <h3>✅ Solución Paso a Paso</h3>
+      <div class="step">
+        <div class="step-title">Paso 1 — Aplicar \(\mathcal{L}\{\cdot\}\)</div>
+        <div class="step-content">
+          \[\bigl(s^2Y - 2s - 7\bigr) - 5\bigl(sY-2\bigr) + 6Y = 0\]
+          \[s^2Y - 2s - 7 - 5sY + 10 + 6Y = 0\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 2 — Despejar \(Y(s)\)</div>
+        <div class="step-content">
+          \[Y(s^2-5s+6)=2s-3\]
+          \[Y(s)=\frac{2s-3}{(s-2)(s-3)}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 3 — Fracciones Parciales</div>
+        <div class="step-content">
+          \[s=2:\quad \frac{2(2)-3}{2-3}=\frac{1}{-1}=-1 \Rightarrow A=-1\]
+          \[s=3:\quad \frac{2(3)-3}{3-2}=\frac{3}{1}=3 \Rightarrow B=3\]
+          \[Y(s)=\frac{-1}{s-2}+\frac{3}{s-3}\]
+        </div>
+      </div>
+      <div class="final-answer">
+        \[\boxed{y(t) = -e^{2t}+3e^{3t}}\]
+      </div>
+      <div class="step verify-step">
+        <div class="step-title">Paso 5 — Verificación</div>
+        <div class="step-content">
+          \(y(0)=-1+3=2\;✓\)<br>
+          \(y'(t)=-2e^{2t}+9e^{3t}\Rightarrow y'(0)=-2+9=7\;✓\)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EJERCICIO 3 — Raíces complejas (oscilaciones amortiguadas)
+═══════════════════════════════════════════════ -->
+<div class="exercise-card" id="card3">
+  <div class="card-header">
+    <h2>Ejercicio 3</h2>
+    <span class="tag">Raíces complejas — oscilaciones amortiguadas</span>
+  </div>
+  <div class="card-body">
+    <div class="problem-box">
+      \(y'' + 2y' + 10y = 0\)
+      <div class="ic">Condiciones iniciales: \(y(0)=1,\quad y'(0)=4\)</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-hint" onclick="toggleHint(3)">💡 Pistas</button>
+      <button class="btn btn-solve" onclick="toggleSolution(3)">📖 Ver solución completa</button>
+      <button class="btn btn-mark" onclick="markDone(3)">✔ Marcar completado</button>
+    </div>
+    <div class="hint-box" id="hint3">
+      <p><strong>Pista 1:</strong> El discriminante es negativo: raíces complejas \(-1\pm 3i\).</p>
+      <p><strong>Pista 2:</strong> Completa el cuadrado: \(s^2+2s+10=(s+1)^2+9\).</p>
+      <p><strong>Pista 3:</strong> Reescribe el numerador usando \((s+1)\): \(s+6=(s+1)+5\).</p>
+    </div>
+    <div class="solution-box" id="sol3">
+      <h3>✅ Solución Paso a Paso</h3>
+      <div class="step">
+        <div class="step-title">Paso 1 — Aplicar \(\mathcal{L}\{\cdot\}\)</div>
+        <div class="step-content">
+          \[\bigl(s^2Y - s - 4\bigr)+2\bigl(sY-1\bigr)+10Y=0\]
+          \[Y(s^2+2s+10)=s+6\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 2 — Completar el cuadrado</div>
+        <div class="step-content">
+          \[Y(s)=\frac{s+6}{(s+1)^2+9}\]
+          Reescribimos: \(s+6=(s+1)+5\)
+          \[Y(s)=\frac{s+1}{(s+1)^2+9}+\frac{5}{(s+1)^2+9}\]
+          \[=\frac{s+1}{(s+1)^2+9}+\frac{5}{3}\cdot\frac{3}{(s+1)^2+9}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 4 — Transformada Inversa</div>
+        <div class="step-content">
+          \[\mathcal{L}^{-1}\!\left\{\frac{s+1}{(s+1)^2+9}\right\}=e^{-t}\cos(3t)\]
+          \[\mathcal{L}^{-1}\!\left\{\frac{3}{(s+1)^2+9}\right\}=e^{-t}\sin(3t)\]
+        </div>
+      </div>
+      <div class="final-answer">
+        \[\boxed{y(t)=e^{-t}\cos(3t)+\tfrac{5}{3}\,e^{-t}\sin(3t)}\]
+      </div>
+      <div class="step verify-step">
+        <div class="step-title">Paso 5 — Verificación</div>
+        <div class="step-content">
+          \(y(0)=1\cdot1+0=1\;✓\)<br>
+          \(y'(t)\big|_{t=0}=\bigl[-e^{-t}\cos3t-3e^{-t}\sin3t+\tfrac{5}{3}(-e^{-t}\sin3t+3e^{-t}\cos3t)\bigr]_{t=0}\)
+          \(=-1+0+5=4\;✓\)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EJERCICIO 4 — Raíces complejas puras
+═══════════════════════════════════════════════ -->
+<div class="exercise-card" id="card4">
+  <div class="card-header">
+    <h2>Ejercicio 4</h2>
+    <span class="tag">Raíces imaginarias puras — oscilaciones puras</span>
+  </div>
+  <div class="card-body">
+    <div class="problem-box">
+      \(y'' + 9y = 0\)
+      <div class="ic">Condiciones iniciales: \(y(0)=2,\quad y'(0)=6\)</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-hint" onclick="toggleHint(4)">💡 Pistas</button>
+      <button class="btn btn-solve" onclick="toggleSolution(4)">📖 Ver solución completa</button>
+      <button class="btn btn-mark" onclick="markDone(4)">✔ Marcar completado</button>
+    </div>
+    <div class="hint-box" id="hint4">
+      <p><strong>Pista 1:</strong> No hay término \(y'\), las raíces son puramente imaginarias \(\pm 3i\).</p>
+      <p><strong>Pista 2:</strong> \(Y(s)=\frac{2s+6}{s^2+9}\) — separa en dos fracciones.</p>
+      <p><strong>Pista 3:</strong> \(\frac{s}{s^2+9}\to\cos(3t)\) y \(\frac{3}{s^2+9}\to\sin(3t)\).</p>
+    </div>
+    <div class="solution-box" id="sol4">
+      <h3>✅ Solución Paso a Paso</h3>
+      <div class="step">
+        <div class="step-title">Paso 1 — Aplicar \(\mathcal{L}\{\cdot\}\)</div>
+        <div class="step-content">
+          \[\bigl(s^2Y-2s-6\bigr)+9Y=0\]
+          \[Y(s^2+9)=2s+6\]
+          \[Y(s)=\frac{2s+6}{s^2+9}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 3 — Separar fracciones</div>
+        <div class="step-content">
+          \[Y(s)=\frac{2s}{s^2+9}+\frac{6}{s^2+9}=\frac{2s}{s^2+9}+2\cdot\frac{3}{s^2+9}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 4 — Transformada Inversa</div>
+        <div class="step-content">
+          \[\mathcal{L}^{-1}\!\left\{\frac{s}{s^2+9}\right\}=\cos(3t),\qquad \mathcal{L}^{-1}\!\left\{\frac{3}{s^2+9}\right\}=\sin(3t)\]
+        </div>
+      </div>
+      <div class="final-answer">
+        \[\boxed{y(t)=2\cos(3t)+2\sin(3t)}\]
+      </div>
+      <div class="step verify-step">
+        <div class="step-title">Paso 5 — Verificación</div>
+        <div class="step-content">
+          \(y(0)=2+0=2\;✓\)<br>
+          \(y'(t)=-6\sin(3t)+6\cos(3t)\Rightarrow y'(0)=0+6=6\;✓\)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EJERCICIO 5 — Simplificación algebraica
+═══════════════════════════════════════════════ -->
+<div class="exercise-card" id="card5">
+  <div class="card-header">
+    <h2>Ejercicio 5</h2>
+    <span class="tag">Simplificación algebraica elegante</span>
+  </div>
+  <div class="card-body">
+    <div class="problem-box">
+      \(y'' + y' - 6y = 0\)
+      <div class="ic">Condiciones iniciales: \(y(0)=2,\quad y'(0)=3\)</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-hint" onclick="toggleHint(5)">💡 Pistas</button>
+      <button class="btn btn-solve" onclick="toggleSolution(5)">📖 Ver solución completa</button>
+      <button class="btn btn-mark" onclick="markDone(5)">✔ Marcar completado</button>
+    </div>
+    <div class="hint-box" id="hint5">
+      <p><strong>Pista 1:</strong> Factoriza el denominador: \(s^2+s-6=(s+3)(s-2)\).</p>
+      <p><strong>Pista 2:</strong> Aplica fracciones parciales al resultado.</p>
+      <p><strong>Pista 3:</strong> Sustituye \(s=-3\) y \(s=2\) para encontrar los coeficientes.</p>
+    </div>
+    <div class="solution-box" id="sol5">
+      <h3>✅ Solución Paso a Paso</h3>
+      <div class="step">
+        <div class="step-title">Paso 1 — Aplicar \(\mathcal{L}\{\cdot\}\)</div>
+        <div class="step-content">
+          \[\bigl(s^2Y-2s-3\bigr)+\bigl(sY-2\bigr)-6Y=0\]
+          \[Y(s^2+s-6)=2s+5\]
+          \[Y(s)=\frac{2s+5}{(s+3)(s-2)}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 3 — Fracciones Parciales</div>
+        <div class="step-content">
+          \[s=-3:\quad\frac{2(-3)+5}{-3-2}=\frac{-1}{-5}=\frac{1}{5}\Rightarrow A=\frac{1}{5}\]
+          \[s=2:\quad\frac{2(2)+5}{2+3}=\frac{9}{5}\Rightarrow B=\frac{9}{5}\]
+          \[Y(s)=\frac{1/5}{s+3}+\frac{9/5}{s-2}\]
+        </div>
+      </div>
+      <div class="final-answer">
+        \[\boxed{y(t)=\tfrac{1}{5}e^{-3t}+\tfrac{9}{5}e^{2t}}\]
+      </div>
+      <div class="step verify-step">
+        <div class="step-title">Paso 5 — Verificación</div>
+        <div class="step-content">
+          \(y(0)=\tfrac{1}{5}+\tfrac{9}{5}=\tfrac{10}{5}=2\;✓\)<br>
+          \(y'(t)=-\tfrac{3}{5}e^{-3t}+\tfrac{18}{5}e^{2t}\Rightarrow y'(0)=-\tfrac{3}{5}+\tfrac{18}{5}=\tfrac{15}{5}=3\;✓\)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EJERCICIO 6 — Raíces complejas amortiguadas (más complejo)
+═══════════════════════════════════════════════ -->
+<div class="exercise-card" id="card6">
+  <div class="card-header">
+    <h2>Ejercicio 6</h2>
+    <span class="tag">Raíces complejas — forma completa</span>
+  </div>
+  <div class="card-body">
+    <div class="problem-box">
+      \(y'' + 4y' + 13y = 0\)
+      <div class="ic">Condiciones iniciales: \(y(0)=1,\quad y'(0)=2\)</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-hint" onclick="toggleHint(6)">💡 Pistas</button>
+      <button class="btn btn-solve" onclick="toggleSolution(6)">📖 Ver solución completa</button>
+      <button class="btn btn-mark" onclick="markDone(6)">✔ Marcar completado</button>
+    </div>
+    <div class="hint-box" id="hint6">
+      <p><strong>Pista 1:</strong> Discriminante \(=16-52=-36<0\): raíces \(-2\pm3i\).</p>
+      <p><strong>Pista 2:</strong> Completa el cuadrado: \(s^2+4s+13=(s+2)^2+9\).</p>
+      <p><strong>Pista 3:</strong> Numerador \(s+6=(s+2)+4\); usa la forma \((s+a)/[(s+a)^2+b^2]\).</p>
+    </div>
+    <div class="solution-box" id="sol6">
+      <h3>✅ Solución Paso a Paso</h3>
+      <div class="step">
+        <div class="step-title">Paso 1 — Aplicar \(\mathcal{L}\{\cdot\}\)</div>
+        <div class="step-content">
+          \[\bigl(s^2Y-s-2\bigr)+4\bigl(sY-1\bigr)+13Y=0\]
+          \[Y(s^2+4s+13)=s+6\]
+          \[Y(s)=\frac{s+6}{(s+2)^2+9}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 3 — Reescribir numerador</div>
+        <div class="step-content">
+          \[s+6=(s+2)+4\]
+          \[Y(s)=\frac{s+2}{(s+2)^2+9}+\frac{4}{(s+2)^2+9}=\frac{s+2}{(s+2)^2+9}+\frac{4}{3}\cdot\frac{3}{(s+2)^2+9}\]
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso 4 — Transformada Inversa</div>
+        <div class="step-content">
+          \[\mathcal{L}^{-1}\!\left\{\frac{s+2}{(s+2)^2+9}\right\}=e^{-2t}\cos(3t)\]
+          \[\mathcal{L}^{-1}\!\left\{\frac{3}{(s+2)^2+9}\right\}=e^{-2t}\sin(3t)\]
+        </div>
+      </div>
+      <div class="final-answer">
+        \[\boxed{y(t)=e^{-2t}\cos(3t)+\tfrac{4}{3}\,e^{-2t}\sin(3t)}\]
+      </div>
+      <div class="step verify-step">
+        <div class="step-title">Paso 5 — Verificación</div>
+        <div class="step-content">
+          \(y(0)=1\cdot1+0=1\;✓\)<br>
+          \(y'(0)=\bigl[-2e^{-2t}\cos3t-3e^{-2t}\sin3t+\tfrac{4}{3}(-2e^{-2t}\sin3t+3e^{-2t}\cos3t)\bigr]_{t=0}\)
+          \(=-2+4=2\;✓\)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <strong>Universidad Nacional Abierta y a Distancia — UNAD</strong><br>
+  Curso: Ecuaciones Diferenciales · Código 100412 · Unidad 3: Transformada de Laplace<br>
+  <em>Material de apoyo pedagógico para estudiantes.</em>
+</footer>
+
+<!-- ══ JAVASCRIPT ══ -->
+<script>
+  const N = 6;
+  const done = new Array(N+1).fill(false);
+
+  // Build progress checkboxes
+  const cb = document.getElementById('checkboxes');
+  for(let i=1;i<=N;i++){
+    const lbl = document.createElement('label');
+    lbl.id = 'lbl'+i;
+    lbl.innerHTML = `<input type="checkbox" id="cb${i}" onchange="updateProgress()"><span>Ej.${i}</span>`;
+    lbl.addEventListener('change', ()=>updateProgress());
+    cb.appendChild(lbl);
+  }
+
+  function updateProgress(){
+    let count=0;
+    for(let i=1;i<=N;i++){
+      const c = document.getElementById('cb'+i);
+      const l = document.getElementById('lbl'+i);
+      if(c && c.checked){ count++; l.classList.add('done'); }
+      else if(l) l.classList.remove('done');
+    }
+    document.getElementById('cnt').textContent=count;
+    document.getElementById('bar').style.width=(count/N*100)+'%';
+  }
+
+  function markDone(n){
+    const c = document.getElementById('cb'+n);
+    if(c){ c.checked=true; updateProgress(); }
+  }
+
+  function toggleHint(n){
+    const el = document.getElementById('hint'+n);
+    el.classList.toggle('visible');
+  }
+
+  function toggleSolution(n){
+    const el = document.getElementById('sol'+n);
+    const wasVisible = el.classList.contains('visible');
+    el.classList.toggle('visible');
+    if(!wasVisible){
+      // Auto-mark when solution revealed
+      markDone(n);
+      setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+    }
+  }
+
+  function toggleRef(){
+    const body = document.getElementById('refBody');
+    const toggle = document.getElementById('refToggle');
+    body.classList.toggle('visible');
+    toggle.classList.toggle('open');
+  }
+
+  // Open reference by default
+  toggleRef();
+</script>
+</body>
+</html>
